@@ -1,0 +1,49 @@
+
+# Environment files
+.env
+.env
+
+# Node dependencies
+node_modules/
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime
+pids
+*.pid
+*.pid.lock
+
+# dotenv
+.env
+.env.test
+.env.production
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# Output
+dist/
+build/
+.cache/
+.parcel-cache/
+coverage/
+.nyc_output/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode
+
+# Yarn v2+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
