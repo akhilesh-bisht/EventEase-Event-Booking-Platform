@@ -1,16 +1,14 @@
-// custom class
-
 class ApiError extends Error {
   constructor(
     statusCode,
-    message = "something went wrong",
+    message = "Something went wrong",
     errors = [],
     stack = ""
   ) {
     super(message);
     this.statusCode = statusCode;
-    this.data = null;
     this.message = message;
+    this.data = null;
     this.success = false;
     this.errors = errors;
 
@@ -19,6 +17,16 @@ class ApiError extends Error {
     } else {
       Error.captureStackTrace(this, this.constructor);
     }
+  }
+
+  toJSON() {
+    return {
+      statusCode: this.statusCode,
+      message: this.message,
+      data: this.data,
+      success: this.success,
+      errors: this.errors,
+    };
   }
 }
 

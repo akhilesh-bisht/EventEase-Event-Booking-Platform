@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
 
 
-export const isAuthenticated = asyncHandler(async (req, res, next) => {
+export const isAuthenticated = async (req, res, next) => {
     
   // Extract token from "Authorization: Bearer <token>"
   const token = req.headers.authorization?.split(" ")[1];
@@ -32,4 +31,4 @@ export const isAuthenticated = asyncHandler(async (req, res, next) => {
   req.user = user;
 
   next();
-});
+};
