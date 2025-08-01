@@ -1,4 +1,4 @@
-import { Booking } from "../models/booking.model.js";
+import { Booking } from "../models/Booking.model.js";
 import { Event } from "../models/Event.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
