@@ -7,17 +7,22 @@ import { ApiResponse } from "../utils/ApiResponse.js";
  * @route  POST /api/auth/register
  * @access Public
  */
+
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
-    // Normalize and validate input
+    // Normalize and validate inputs
     const normalizedEmail = email?.toLowerCase().trim();
     if (!name?.trim() || !normalizedEmail || !password?.trim()) {
       return res
         .status(400)
         .json(new ApiError(400, "Name, email, and password are required"));
     }
+
+    // Role validation (optional: limit roles to known values)
+    const allowedRoles = ["user", "admin"];
+    const finalRole = allowedRoles.includes(role) ? role : "user";
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: normalizedEmail });
@@ -26,21 +31,27 @@ export const registerUser = async (req, res) => {
     }
 
     // Create user
-    const user = await User.create({ name, email: normalizedEmail, password });
+    const user = await User.create({
+      name,
+      email: normalizedEmail,
+      password,
+      role: finalRole,
+    });
 
-    // Generate token
+    // Generate JWT token
     const token = user.generateAccessToken();
 
-    // Remove sensitive info
+    // Exclude password from returned data
     const userData = await User.findById(user._id).select("-password");
 
-    // Set token in cookie
+    // Set token in HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
+    // Send response
     return res
       .status(201)
       .json(
@@ -85,9 +96,12 @@ export const loginUser = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    //  send response with userdata
     return res
       .status(200)
-      .json(new ApiResponse(200, { user: userData }, "Login successful"));
+      .json(
+        new ApiResponse(200, { user: userData }, "Login successful")
+      );
   } catch (error) {
     console.error("Error during login:", error);
     return res.status(500).json(new ApiError(500, "Login failed"));

@@ -18,8 +18,13 @@ app.use(cookieParser());
 
 // routes import
 import userRouter from "./routes/user.routes.js";
+import eventRoutes from "./routes/event.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
+
 
 //routes declarations
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/events", eventRoutes);
+app.use("/api/v1/bookings", bookingRoutes);
 
 export default app;
