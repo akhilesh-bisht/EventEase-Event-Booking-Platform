@@ -15,8 +15,6 @@ const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("list");
   const [user, setUser] = useState(null);
 
-  // get my booking and calender view for events
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -26,7 +24,17 @@ const UserDashboard = () => {
           getCalendarEvents(),
         ]);
         setBookings(bookingsData.message);
-        setCalendarEvents(calendarData.message);
+        // Deduplicate calendar events by title + date + location
+        const uniqueEvents = [];
+        const seen = new Set();
+        for (const e of calendarData.message) {
+          const key = `${e.title}-${e.date}-${e.location}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            uniqueEvents.push(e);
+          }
+        }
+        setCalendarEvents(uniqueEvents);
       } catch {
         toast.error("Failed to load dashboard data.");
       } finally {
@@ -42,8 +50,6 @@ const UserDashboard = () => {
     fetchData();
   }, []);
 
-  // cancle the bokking
-
   const handleCancelBooking = async (bookingId, eventDate) => {
     const eventDateTime = new Date(eventDate);
     const now = new Date();
@@ -57,13 +63,10 @@ const UserDashboard = () => {
       const toastId = toast.loading("Cancelling booking...");
       try {
         await cancelBooking(bookingId);
-
         const updatedBookings = await getMyBookings();
         const updatedEvents = await getCalendarEvents();
-
         setBookings(updatedBookings.message);
         setCalendarEvents(updatedEvents.message);
-
         toast.success("Booking canceled successfully.", { id: toastId });
       } catch {
         toast.error("Failed to cancel the booking.", { id: toastId });
@@ -111,18 +114,8 @@ const UserDashboard = () => {
   };
 
   const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
   ];
 
   if (loading) {
@@ -161,46 +154,50 @@ const UserDashboard = () => {
           {bookings.length === 0 ? (
             <p>No bookings found.</p>
           ) : (
-            bookings.map((booking) => (
-              <div
-                key={booking._id}
-                className="p-4 border rounded shadow flex justify-between items-center bg-white"
-              >
-                <div>
-                  <h3 className="text-lg font-semibold">
-                    {booking.event.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    <strong>Time:</strong>{" "}
-                    {new Date(booking.event.date).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Location:</strong> {booking.event.location}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Seats:</strong> {booking.seats}
-                  </p>
-                  <span
-                    className={`text-xs px-2 py-1 rounded inline-block mt-1 ${getStatusColor(
-                      booking.status
-                    )}`}
-                  >
-                    {booking.status}
-                  </span>
-                </div>
-                {booking.status !== "cancelled" &&
-                  canCancelBooking(booking.event.date) && (
-                    <button
-                      onClick={() =>
-                        handleCancelBooking(booking._id, booking.event.date)
-                      }
-                      className="text-red-500 hover:text-red-700 font-semibold"
+            bookings.map((booking) => {
+              if (!booking.event) return null; // skip invalid bookings
+
+              return (
+                <div
+                  key={booking._id}
+                  className="p-4 border rounded shadow flex justify-between items-center bg-white"
+                >
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {booking.event.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      <strong>Time:</strong>{" "}
+                      {new Date(booking.event.date).toLocaleString()}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Location:</strong> {booking.event.location}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Seats:</strong> {booking.seats}
+                    </p>
+                    <span
+                      className={`text-xs px-2 py-1 rounded inline-block mt-1 ${getStatusColor(
+                        booking.status
+                      )}`}
                     >
-                      Cancel
-                    </button>
-                  )}
-              </div>
-            ))
+                      {booking.status}
+                    </span>
+                  </div>
+                  {booking.status !== "cancelled" &&
+                    canCancelBooking(booking.event.date) && (
+                      <button
+                        onClick={() =>
+                          handleCancelBooking(booking._id, booking.event.date)
+                        }
+                        className="text-red-500 hover:text-red-700 font-semibold"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                </div>
+              );
+            })
           )}
         </div>
       )}

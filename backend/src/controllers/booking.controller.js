@@ -211,18 +211,34 @@ export const getUserBookingsCalendar = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id }).populate("event");
 
-    const calendarEvents = bookings.map((booking) => ({
-      title: booking.event.title,
-      date: new Date(booking.event.date).toISOString().split("T")[0], // YYYY-MM-DD
-      location: booking.event.location,
-      seats: booking.seats,
-      status:
-        new Date(booking.event.date) < new Date()
-          ? "Completed"
-          : new Date(booking.event.date).toDateString() === new Date().toDateString()
-          ? "Ongoing"
-          : "Upcoming",
-    }));
+    // Optional: Log any bookings missing event data
+    bookings.forEach((booking) => {
+      if (!booking.event) {
+        console.warn(`Missing event for booking ID: ${booking._id}`);
+      }
+    });
+
+    const calendarEvents = bookings
+      .filter((booking) => booking.event) 
+      .map((booking) => {
+        const eventDate = new Date(booking.event.date);
+        const today = new Date();
+
+        let status = "Upcoming";
+        if (eventDate < today) {
+          status = "Completed";
+        } else if (eventDate.toDateString() === today.toDateString()) {
+          status = "Ongoing";
+        }
+
+        return {
+          title: booking.event.title,
+          date: eventDate.toISOString().split("T")[0], 
+          location: booking.event.location,
+          seats: booking.seats,
+          status,
+        };
+      });
 
     return res.status(200).json(new ApiResponse(200, calendarEvents));
   } catch (error) {
