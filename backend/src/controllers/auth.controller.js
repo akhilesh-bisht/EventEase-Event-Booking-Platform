@@ -89,18 +89,11 @@ export const loginUser = async (req, res) => {
     const token = user.generateAccessToken();
     const userData = await User.findById(user._id).select("-password");
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    //  send response with userdata
+    // Send token and user data in the response body (no cookies)
     return res
       .status(200)
       .json(
-        new ApiResponse(200, { user: userData }, "Login successful")
+        new ApiResponse(200, { user: userData, token }, "Login successful")
       );
   } catch (error) {
     console.error("Error during login:", error);

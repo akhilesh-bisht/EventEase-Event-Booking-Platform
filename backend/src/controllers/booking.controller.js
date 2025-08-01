@@ -135,9 +135,7 @@ export const bookEvent = async (req, res) => {
 // @access Private (User)
 export const cancelBooking = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.bookingId).populate(
-      "event"
-    );
+    const booking = await Booking.findById(req.params.bookingId).populate("event");
 
     if (!booking) {
       return res.status(404).json(new ApiError(404, "Booking not found."));
@@ -160,15 +158,12 @@ export const cancelBooking = async (req, res) => {
       $pull: { attendees: req.user._id },
     });
 
-    //  Send cancellation email
     await sendEmail(
       req.user.email,
       `Booking Cancelled - ${booking.event.title}`,
       `
         <h3>Booking Cancelled</h3>
-        <p>Your booking for <strong>${
-          booking.event.title
-        }</strong> has been cancelled.</p>
+        <p>Your booking for <strong>${booking.event.title}</strong> has been cancelled.</p>
         <p><strong>Scheduled Date:</strong> ${new Date(
           booking.event.date
         ).toLocaleDateString("en-GB", {
@@ -180,14 +175,13 @@ export const cancelBooking = async (req, res) => {
       `
     );
 
-    return res
-      .status(200)
-      .json(new ApiResponse(200, null, "Booking cancelled successfully."));
+    return res.status(200).json(new ApiResponse(200, null, "Booking cancelled successfully."));
   } catch (error) {
     console.error("Cancel error:", error);
     return res.status(500).json(new ApiError(500, "Failed to cancel booking"));
   }
 };
+
 
 // ==========================
 // @desc   Get user's bookings
@@ -205,5 +199,34 @@ export const getMyBookings = async (req, res) => {
   } catch (error) {
     console.error("Fetch error:", error);
     return res.status(500).json(new ApiError(500, "Could not fetch bookings"));
+  }
+};
+
+
+
+
+
+//  booking calender
+export const getUserBookingsCalendar = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ user: req.user._id }).populate("event");
+
+    const calendarEvents = bookings.map((booking) => ({
+      title: booking.event.title,
+      date: new Date(booking.event.date).toISOString().split("T")[0], // YYYY-MM-DD
+      location: booking.event.location,
+      seats: booking.seats,
+      status:
+        new Date(booking.event.date) < new Date()
+          ? "Completed"
+          : new Date(booking.event.date).toDateString() === new Date().toDateString()
+          ? "Ongoing"
+          : "Upcoming",
+    }));
+
+    return res.status(200).json(new ApiResponse(200, calendarEvents));
+  } catch (error) {
+    console.error("Calendar fetch error:", error);
+    return res.status(500).json(new ApiError(500, "Failed to fetch calendar data"));
   }
 };
