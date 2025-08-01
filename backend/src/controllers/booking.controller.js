@@ -1,5 +1,5 @@
 import { Booking } from "../models/booking.model.js";
-import { Event } from "../models/event.model.js";
+import { Event } from "../models/Event.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { sendEmail } from "../utils/sendEmail.js";

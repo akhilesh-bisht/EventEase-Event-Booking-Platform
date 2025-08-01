@@ -1,5 +1,5 @@
-import { Event } from "../models/event.model.js";
-import { Booking } from "../models/booking.model.js"; // ✅ Added to calculate booked seats
+import { Event } from "../models/Event.model.js";
+import { Booking } from "../models/booking.model.js"; 
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { generateEventId } from "../utils/generateEventID.js";
