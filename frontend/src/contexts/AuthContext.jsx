@@ -51,9 +51,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // register fun
-  const register = async (name, email, password) => {
+  const register = async (name, email, password , role) => {
     try {
-      const data = await registerApi(name, email, password);
+      const data = await registerApi(name, email, password , role);
+
+      console.log(data);
+      
 
       const user = data?.message?.user;
       const token = data?.message?.token;

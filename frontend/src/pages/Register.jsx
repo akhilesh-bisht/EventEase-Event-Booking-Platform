@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext"; // Use AuthContext instead of direct axios
+import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -9,12 +9,12 @@ const Signup = () => {
     name: "",
     email: "",
     password: "",
-    role: "user", // Default role is 'user'
+    role: "user",
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { register } = useAuth(); 
+  const { register } = useAuth();
 
   // Email validation helper
   const isValidEmail = (email) => {

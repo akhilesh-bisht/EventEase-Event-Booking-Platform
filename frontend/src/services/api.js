@@ -52,9 +52,9 @@ export async function login(email, password) {
   }
 }
 
-export async function register(name, email, password) {
+export async function register(name, email, password , role) {
   try {
-    const res = await api.post("/users/signup", { name, email, password });
+    const res = await api.post("/users/signup", { name, email, password , role });
     return res.data;
   } catch (err) {
     console.error("Registration failed:", err);

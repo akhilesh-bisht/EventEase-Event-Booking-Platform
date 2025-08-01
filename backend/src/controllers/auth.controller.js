@@ -55,7 +55,7 @@ export const registerUser = async (req, res) => {
     return res
       .status(201)
       .json(
-        new ApiResponse(201, { user: userData }, "Registered successfully")
+        new ApiResponse(201, { user: userData , token }, "Registered successfully")
       );
   } catch (error) {
     console.error("Error during registration:", error);
